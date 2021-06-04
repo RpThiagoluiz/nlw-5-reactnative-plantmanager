@@ -1,27 +1,43 @@
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import React from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { Button } from "../components/Button";
 import { colors } from "../styles/colors";
 import { fonts } from "../styles/fonts";
 
+interface ConfirmationParamsProps {
+  title: string;
+  subtitle: string;
+  buttonTitle: string;
+  icon: "smile" | "hug";
+  nextScreen: string;
+}
+
+const emojis = {
+  hug: "🤗",
+  smile: "☺",
+};
+
 export const Confirmation = () => {
   const { navigate } = useNavigation();
+  //Essa tela vai se repetir por algumas vezes, e vamos pegar as props dela, pela rota que for acessar ela como confirmacao.
+  const routes = useRoute();
+
+  const { title, subtitle, buttonTitle, icon, nextScreen } =
+    routes.params as ConfirmationParamsProps;
 
   const handleMoveOn = () => {
-    navigate("PlantSelect");
+    navigate(nextScreen);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.emoji}>😊</Text>
-        <Text style={styles.title}>Prontinho</Text>
-        <Text style={styles.subtitle}>
-          Agora vamos comecar a cuidar das suas plantinhas com muito cuidado.
-        </Text>
+        <Text style={styles.emoji}>{emojis[icon]}</Text>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
         <View style={styles.footer}>
-          <Button text="Confirmar" onPress={handleMoveOn} />
+          <Button text={buttonTitle} onPress={handleMoveOn} />
         </View>
       </View>
     </SafeAreaView>

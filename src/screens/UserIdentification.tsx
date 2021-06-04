@@ -9,8 +9,10 @@ import {
   TouchableWithoutFeedback,
   Platform,
   Keyboard,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/core";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Button } from "../components/Button";
 import { colors } from "../styles/colors";
 import { fonts } from "../styles/fonts";
@@ -46,11 +48,24 @@ export const UserIdentification = () => {
 
   const { navigate } = useNavigation();
 
-  const handleConfirmation = () => {
+  const handleConfirmation = async () => {
     if (!!enteredName) {
-      navigate("Confirmation");
+      //Igual no localStorage, pega o AsyncStorage -  passando chave valor.
+      try {
+        await AsyncStorage.setItem("@nlw#5_rn_plantManager:user", enteredName);
+        navigate("Confirmation", {
+          title: "Prontinho",
+          subtitle:
+            "Agora vamos comecar a cuidar das suas plantinhas com muito cuidado.",
+          buttonTitle: "Comecar",
+          icon: "smile",
+          nextScreen: "PlantSelect",
+        });
+      } catch (error) {
+        Alert.alert(`Nao foi possivel salvar o seu nome. 😢`);
+      }
     } else {
-      alert(`Preencha o nome primeiro`);
+      Alert.alert(`Preencha o nome primeiro 😢`);
     }
   };
 

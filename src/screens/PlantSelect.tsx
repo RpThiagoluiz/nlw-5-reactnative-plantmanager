@@ -7,9 +7,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { api } from "../services/api";
+import { useNavigation } from "@react-navigation/core";
 import { EnviromentButton } from "../components/EnviromentButton";
 import { Header } from "../components/Header";
 import { PlantCartPrimary } from "../components/PlantCartPrimary";
+import { PlantsProps } from "../libs/storage";
 import { Load } from "../components/Load";
 import { colors } from "../styles/colors";
 import { fonts } from "../styles/fonts";
@@ -17,18 +19,6 @@ import { fonts } from "../styles/fonts";
 interface EnviromentProps {
   key: string;
   title: string;
-}
-interface PlantsProps {
-  id: number;
-  name: string;
-  about: string;
-  water_tips: string;
-  photo: string;
-  environments: [string];
-  frequency: {
-    times: number;
-    repeat_every: string;
-  };
 }
 
 export const PlantSelect = () => {
@@ -43,7 +33,9 @@ export const PlantSelect = () => {
   //Pagination
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(true); //outra animacao de rolagem
-  const [loadedAll, setLoadingAll] = useState(false);
+
+  //Navi por planta Selecionada
+  const { navigate } = useNavigation();
 
   const fetchPlants = async () => {
     //Promise, depende de varios fatores externos, ping, e blabla
@@ -84,6 +76,11 @@ export const PlantSelect = () => {
     fetchPlants();
   };
 
+  const handlePlantSelected = (plant: PlantsProps) => {
+    //Plant ja ta vindo no click - vc tbm ja pode passar ela por aq.
+    navigate("PlantSave", { plant });
+  };
+
   useEffect(() => {
     const fetchEnviroment = async () => {
       //Promise, depende de varios fatores externos, ping, e blabla
@@ -113,6 +110,8 @@ export const PlantSelect = () => {
       <View>
         <FlatList
           data={enviroment}
+          keyExtractor={(item) => String(item.key)}
+          //Sempre deve ser uma string
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.enviromentList}
@@ -129,6 +128,7 @@ export const PlantSelect = () => {
       <View style={styles.plants}>
         <FlatList
           data={filteredPlants}
+          keyExtractor={(item) => String(item.id)}
           showsVerticalScrollIndicator={false}
           numColumns={2}
           contentContainerStyle={styles.contentContainerStyle}
@@ -140,7 +140,12 @@ export const PlantSelect = () => {
           ListFooterComponent={
             loadingMore ? <ActivityIndicator color={colors.green} /> : <></>
           }
-          renderItem={({ item }) => <PlantCartPrimary data={item} />}
+          renderItem={({ item }) => (
+            <PlantCartPrimary
+              data={item}
+              onPress={() => handlePlantSelected(item)}
+            />
+          )}
         />
       </View>
     </View>

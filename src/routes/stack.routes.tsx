@@ -3,6 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { Welcome } from "../screens/Welcome";
 import { UserIdentification } from "../screens/UserIdentification";
 import { Confirmation } from "../screens/Confirmation";
+import { PlantSelect } from "../screens/PlantSelect";
 import { colors } from "../styles/colors";
 
 const stackRoutes = createStackNavigator();
@@ -22,6 +23,7 @@ export const StackRoutes = () => (
       component={UserIdentification}
     />
     <stackRoutes.Screen name="Confirmation" component={Confirmation} />
+    <stackRoutes.Screen name="PlantSelect" component={PlantSelect} />
   </stackRoutes.Navigator>
 );
 //Nao sei se precisa ser default vamos ver agorinha

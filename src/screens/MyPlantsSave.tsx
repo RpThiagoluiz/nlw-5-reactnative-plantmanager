@@ -1,18 +1,48 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Image, FlatList } from "react-native";
+//ScrollView -< tela do user caso nao caiba
+import { StyleSheet, View, Text, Image, FlatList, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Header } from "../components/Header";
+
 import dropWater from "../assets/waterdrop.png";
 import { colors } from "../styles/colors";
-import { PlantsProps, loadPlantsInStorage } from "../libs/storage";
+import {
+  PlantsProps,
+  loadPlantsInStorage,
+  removePlantsInStorage,
+} from "../libs/storage";
 import { formatDistance } from "date-fns";
 import { pt } from "date-fns/locale";
 import { fonts } from "../styles/fonts";
 import { PlantCartSecondary } from "../components/PlantCartSecondary";
+import { LoadingMyPlants } from "../components/LoadMyPlants";
 
 export const MyPlantsSave = () => {
   const [myPlants, setMyPlants] = useState<PlantsProps[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [nextWaterd, setNextWaterd] = useState("");
+
+  const handleRemove = (plant: PlantsProps) => {
+    Alert.alert("Remove", `Deseja remover a ${plant.name}?`, [
+      {
+        text: "Nao 🙏",
+        style: "cancel",
+      },
+      {
+        text: "Sim 😭",
+        onPress: async () => {
+          try {
+            await removePlantsInStorage(String(plant.id));
+            setMyPlants((prevState) =>
+              prevState.filter((item) => item.id !== plant.id)
+            );
+          } catch (error) {
+            Alert.alert(`Nao foi possivel remover !`);
+          }
+        },
+      },
+    ]);
+  };
 
   useEffect(() => {
     const loadStorageData = async () => {
@@ -28,11 +58,15 @@ export const MyPlantsSave = () => {
         `Nao esqueca de regar a ${plantsStoraged[0].name} a ${nextTime} horas`
       );
       setMyPlants(plantsStoraged);
-      setLoading(false);
+      //setLoading(false)
     };
-
     loadStorageData();
+    const timeOut = setTimeout(() => setLoading(false), 6000);
+
+    return () => clearTimeout(timeOut);
   }, []);
+
+  if (loading) return <LoadingMyPlants />;
 
   return (
     <View style={styles.container}>
@@ -49,7 +83,12 @@ export const MyPlantsSave = () => {
           keyExtractor={(item) => String(item.id)}
           showsVerticalScrollIndicator={false}
           //contentContainerStyle={{ flex: 1 }}
-          renderItem={({ item }) => <PlantCartSecondary data={item} />}
+          renderItem={({ item }) => (
+            <PlantCartSecondary
+              data={item}
+              handleRemove={() => handleRemove(item)}
+            />
+          )}
         />
       </View>
     </View>
